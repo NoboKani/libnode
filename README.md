@@ -1,6 +1,6 @@
 # libnode 
 
-[![release.yml workflow status](https://github.com/patr0nus/libnode/workflows/Release/badge.svg)](https://github.com/patr0nus/libnode/actions/workflows/release.yml)
+[![release.yml workflow status](https://github.com/NoboKani/libnode/workflows/Release/badge.svg)](https://github.com/NoboKani/libnode/actions/workflows/release.yml)
 
 This repo contains the scripts that build [Node.js](http://nodejs.org/) as a static library for embedding in [DeskGap](https://deskgap.com/).
 
