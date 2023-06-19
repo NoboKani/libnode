@@ -49,14 +49,14 @@ elif sys.platform == 'linux':
 
 additional_obj_glob = nodeSrcFolder + '/out/Release/obj.target/node/gen/*.o'
 if sys.platform == 'win32':
-    additional_obj_glob = nodeSrcFolder + '/out/Release/obj/node_mksnapshot/src/*.obj'
+    additional_obj_glob = f"{nodeSrcFolder}\\out\\Release\\obj\\node_mksnapshot\\src\\*.obj"
 
 if sys.platform == 'win32':
     subprocess.check_call([
             'lib', '/OUT:' + os.path.join(libFolder, "libnode_snapshot.lib")
         ] + 
         glob.glob(additional_obj_glob) + 
-        glob.glob(nodeSrcFolder + '/out/Release/obj/node_mksnapshot/tools/msvs/pch/*.obj')
+        glob.glob(f"{nodeSrcFolder}\\out\\Release\\obj\\node_mksnapshot\\tools\\msvs\\pch\\*.obj")
     )
 else:
     subprocess.check_call([
