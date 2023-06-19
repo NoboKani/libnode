@@ -5,5 +5,8 @@ import shutil
 
 os.chdir('node-{}'.format(config.nodeVersion))
 
-shutil.copytree('../patch/node', '.', dirs_exist_ok=True)
+print(os.getcwd())
+
+shutil.copyfile('../patch/node/src/node_embedding_api.cc', './src/node_embedding_api.cc')
+shutil.copyfile('../patch/node/src/node_embedding_api.h',  './src/node_embedding_api.h')
 subprocess.check_call(['patch', '-p1', '-i', '../patch/node.patch'])
