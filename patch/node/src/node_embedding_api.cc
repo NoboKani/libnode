@@ -130,7 +130,7 @@ extern "C" {
         node_run_result_t result = RunNodeInstance(platform.get(), process_args, exec_args, options.napi_reg_func);
 
         v8::V8::Dispose();
-        v8::V8::ShutdownPlatform();
+        v8::V8::DisposePlatform();
 
         return result;
     }
