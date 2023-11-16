@@ -9,8 +9,6 @@
        'src/api/async_resource.cc',
        'src/api/callback.cc',
        'src/api/embed_helpers.cc',
-diff --git a/tools/install.py b/tools/install.py
-index 11616e1bca..a833968e74 100755
 --- a/tools/install.py
 +++ b/tools/install.py
 @@ -312,6 +312,7 @@ def headers(action):
@@ -21,3 +19,4 @@ index 11616e1bca..a833968e74 100755
      'src/js_native_api.h',
      'src/js_native_api_types.h',
      'src/node_api_types.h',
+
