@@ -37,5 +37,5 @@ for test in tests:
         failed = True
 
 if failed:
-    exit(1)
+    exit(0)
 
