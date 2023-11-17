@@ -44,13 +44,10 @@ namespace {
             
         std::vector<std::string> errors;
         std::unique_ptr<node::CommonEnvironmentSetup> setup =
-            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args, {
+            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args/*, {
                 node::ProcessInitializationFlags::kDisableCLIOptions,
                 node::ProcessInitializationFlags::kDisableNodeOptionsEnv
-            });
-
-        /*
-        , */
+            }*/);
 
         if (!setup) {
             return { 1, join_errors(errors) };
@@ -71,7 +68,6 @@ namespace {
             v8::HandleScope handle_scope(isolate);
             v8::Context::Scope context_scope(setup->context());
 
-            // this need?
             node::AddLinkedBinding(env, napi_module {
                 NAPI_MODULE_VERSION,
                 node::ModuleFlags::kLinked,
@@ -130,7 +126,7 @@ extern "C" {
         v8::V8::InitializePlatform(platform.get());
         v8::V8::Initialize();
 
-        node_run_result_t result = RunNodeInstance(platform.get(), process_args, exec_args, options.napi_reg_func);
+        node_run_result_t result = RunNodeInstance(platform.get(), resultInit->args(), resultInit->exec_args(), options.napi_reg_func);
 
         v8::V8::Dispose();
         v8::V8::DisposePlatform();
