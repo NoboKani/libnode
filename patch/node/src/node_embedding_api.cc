@@ -41,24 +41,25 @@ namespace {
         const std::vector<std::string>& exec_args,
         napi_addon_register_func napi_reg_func
     ) {
+            
         std::vector<std::string> errors;
         std::unique_ptr<node::CommonEnvironmentSetup> setup =
-            node::CommonEnvironmentSetup::Create(
-                platform, &errors, args, exec_args,
-                static_cast<node::EnvironmentFlags::Flags>(
-                    node::EnvironmentFlags::kDefaultFlags |
-                    node::EnvironmentFlags::kNoGlobalSearchPaths
-                )
-            );
+            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args);
+
+        /*
+        , {
+                node::ProcessInitializationFlags::kDisableCLIOptions,
+                node::ProcessInitializationFlags::kDisableNodeOptionsEnv
+            }*/
 
         if (!setup) {
-            return { 1, join_errors(errors) };
+            return { 1, errors };
         }
 
         v8::Isolate* isolate = setup->isolate();
         node::Environment* env = setup->env();
 
-        node_run_result_t result { 0, nullptr };
+        node_run_result_t result { 0, {} };
         node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
             result.exit_code = exit_code;
             node::Stop(env);
@@ -70,6 +71,7 @@ namespace {
             v8::HandleScope handle_scope(isolate);
             v8::Context::Scope context_scope(setup->context());
 
+            // this need?
             node::AddLinkedBinding(env, napi_module {
                 NAPI_MODULE_VERSION,
                 node::ModuleFlags::kLinked,
@@ -106,23 +108,27 @@ extern "C" {
     node_run_result_t node_run(node_options_t options) {
         std::vector<std::string> process_args = create_arg_vec(options.process_argc, options.process_argv);
         if (process_args.empty()) {
-            return { 1, join_errors({ "process args is empty" })};
+            return { 1, { "process args is empty" }};
         } 
-        std::vector<std::string> args { process_args[0] };
+
+        uv_setup_args(options.process_argc, options.process_argv);
+        std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
 
         std::vector<std::string> exec_args;
         std::vector<std::string> errors;
-        int exit_code = node::InitializeNodeWithArgs(
-            &args, &exec_args, &errors,
-            static_cast<node::ProcessFlags::Flags>(
-                node::ProcessFlags::kDisableCLIOptions |
-                node::ProcessFlags::kDisableNodeOptionsEnv
-            )
-        );
 
-        if (exit_code != 0) {
-            return { exit_code, join_errors(errors) };
+        std::unique_ptr<node::InitializationResult> result = node::InitializeOncePerProcess(args, {
+            node::ProcessInitializationFlags::kDisableCLIOptions,
+            node::ProcessInitializationFlags::kDisableNodeOptionsEnv
+        });
+
+        for (const std::string& error : result->errors())
+            fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
+            
+        if (result->early_return() != 0) {
+            return { result->exit_code(), result->errors() };
         }
+
         std::unique_ptr<node::MultiIsolatePlatform> platform = node::MultiIsolatePlatform::Create(4);
         v8::V8::InitializePlatform(platform.get());
         v8::V8::Initialize();
@@ -131,7 +137,9 @@ extern "C" {
 
         v8::V8::Dispose();
         v8::V8::DisposePlatform();
+        
+        node::TearDownOncePerProcess();
 
-        return result;
+        return { result->exit_code(), {} };
     }
 }

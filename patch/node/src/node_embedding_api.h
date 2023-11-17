@@ -9,14 +9,14 @@ extern "C" {
 
 typedef struct {
 	int process_argc;
-	const char* const * process_argv;	
+	char** process_argv;	
 
 	napi_addon_register_func napi_reg_func;
 } node_options_t;
 
 typedef struct {
 	int exit_code;
-	char* error;
+	std::vector<std::string> error;
 } node_run_result_t;
 
 node_run_result_t node_run(node_options_t);
