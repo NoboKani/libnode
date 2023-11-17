@@ -41,13 +41,8 @@ namespace {
         const std::vector<std::string>& exec_args,
         napi_addon_register_func napi_reg_func
     ) {
-            
         std::vector<std::string> errors;
-        std::unique_ptr<node::CommonEnvironmentSetup> setup =
-            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args/*, {
-                node::ProcessInitializationFlags::kDisableCLIOptions,
-                node::ProcessInitializationFlags::kDisableNodeOptionsEnv
-            }*/);
+        std::unique_ptr<node::CommonEnvironmentSetup> setup = node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args);
 
         if (!setup) {
             return { 1, join_errors(errors) };
@@ -57,10 +52,10 @@ namespace {
         node::Environment* env = setup->env();
 
         node_run_result_t result { 0, nullptr };
-        node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
-            result.exit_code = exit_code;
-            node::Stop(env);
-        });
+        // node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
+        //     result.exit_code = exit_code;
+        //     node::Stop(env);
+        // });
 
         {
             v8::Locker locker(isolate);
@@ -102,18 +97,12 @@ namespace {
 
 extern "C" {
     node_run_result_t node_run(node_options_t options) {
-        std::vector<std::string> process_args = create_arg_vec(options.process_argc, options.process_argv);
-        if (process_args.empty()) {
-            return { 1, { "process args is empty" }};
-        } 
-
-        uv_setup_args(options.process_argc, options.process_argv);
+        options.process_argv = uv_setup_args(options.process_argc, options.process_argv);
         std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
 
-        std::vector<std::string> exec_args;
-        std::vector<std::string> errors;
-
         std::unique_ptr<node::InitializationResult> resultInit = node::InitializeOncePerProcess(args, {
+            node::ProcessInitializationFlags::kNoInitializeV8,
+            node::ProcessInitializationFlags::kNoInitializeNodeV8Platform,
             node::ProcessInitializationFlags::kDisableCLIOptions,
             node::ProcessInitializationFlags::kDisableNodeOptionsEnv
         });
