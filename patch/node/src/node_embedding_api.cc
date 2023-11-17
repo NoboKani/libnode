@@ -44,13 +44,13 @@ namespace {
             
         std::vector<std::string> errors;
         std::unique_ptr<node::CommonEnvironmentSetup> setup =
-            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args);
-
-        /*
-        , {
+            node::CommonEnvironmentSetup::Create(platform, &errors, args, exec_args, {
                 node::ProcessInitializationFlags::kDisableCLIOptions,
                 node::ProcessInitializationFlags::kDisableNodeOptionsEnv
-            }*/
+            });
+
+        /*
+        , */
 
         if (!setup) {
             return { 1, join_errors(errors) };
@@ -121,9 +121,6 @@ extern "C" {
             node::ProcessInitializationFlags::kDisableCLIOptions,
             node::ProcessInitializationFlags::kDisableNodeOptionsEnv
         });
-
-        for (const std::string& error : resultInit->errors())
-            fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
             
         if (resultInit->early_return() != 0) {
             return { resultInit->exit_code(), join_errors(resultInit->errors()) };
