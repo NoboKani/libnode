@@ -52,11 +52,6 @@ if sys.platform == 'win32':
     additional_obj_glob = f"{nodeSrcFolder}\\out\\Release\\obj\\node_mksnapshot\\src\\*.obj"
 
 if sys.platform == 'win32':
-    print( "Info: " + " ".join([
-            'lib', '/OUT:' + os.path.join(libFolder, "libnode_snapshot.lib")
-        ] + 
-        glob.glob(additional_obj_glob) + 
-        glob.glob(f"{nodeSrcFolder}\\out\\Release\\obj\\node_mksnapshot\\tools\\msvs\\pch\\*.obj")))
     subprocess.check_call([
             'lib', '/OUT:' + os.path.join(libFolder, "libnode_snapshot.lib")
         ] + 

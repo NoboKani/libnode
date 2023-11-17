@@ -23,13 +23,13 @@ static napi_value napi_entry(napi_env env, napi_value exports) {
   return nullptr;
 }
 
-int main(int argc, const char** argv) {
+int main(int argc, char** argv) {
 	if (argc <= 1) {
 		printf("No script arg\n");
 		return 1;
 	}
 	script = argv[1];
-  node_run_result_t res = node_run({ argc, (const char* const*)argv, napi_entry });
+  node_run_result_t res = node_run({ argc, argv, napi_entry });
   if (res.error) {
     printf("%s\n", res.error);
   }
