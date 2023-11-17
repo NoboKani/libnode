@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
 	int exit_code;
-	std::vector<std::string> error;
+	char* error;
 } node_run_result_t;
 
 node_run_result_t node_run(node_options_t);

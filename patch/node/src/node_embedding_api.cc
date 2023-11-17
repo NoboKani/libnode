@@ -53,13 +53,13 @@ namespace {
             }*/
 
         if (!setup) {
-            return { 1, errors };
+            return { 1, join_errors(errors) };
         }
 
         v8::Isolate* isolate = setup->isolate();
         node::Environment* env = setup->env();
 
-        node_run_result_t result { 0, {} };
+        node_run_result_t result { 0, nullptr };
         node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
             result.exit_code = exit_code;
             node::Stop(env);
@@ -117,16 +117,16 @@ extern "C" {
         std::vector<std::string> exec_args;
         std::vector<std::string> errors;
 
-        std::unique_ptr<node::InitializationResult> result = node::InitializeOncePerProcess(args, {
+        std::unique_ptr<node::InitializationResult> resultInit = node::InitializeOncePerProcess(args, {
             node::ProcessInitializationFlags::kDisableCLIOptions,
             node::ProcessInitializationFlags::kDisableNodeOptionsEnv
         });
 
-        for (const std::string& error : result->errors())
+        for (const std::string& error : resultInit->errors())
             fprintf(stderr, "%s: %s\n", args[0].c_str(), error.c_str());
             
-        if (result->early_return() != 0) {
-            return { result->exit_code(), result->errors() };
+        if (resultInit->early_return() != 0) {
+            return { resultInit->exit_code(), join_errors(resultInit->errors()) };
         }
 
         std::unique_ptr<node::MultiIsolatePlatform> platform = node::MultiIsolatePlatform::Create(4);
@@ -140,6 +140,6 @@ extern "C" {
         
         node::TearDownOncePerProcess();
 
-        return { result->exit_code(), {} };
+        return result;
     }
 }
