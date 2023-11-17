@@ -82,7 +82,7 @@ jobs:
           path: ${{ steps.archive.outputs.zipname }}
 
       - name: Test
-       run: python -m scripts.test
+        run: python -m scripts.test
         
   gh_release:
     needs: build
