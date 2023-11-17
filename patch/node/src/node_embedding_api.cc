@@ -52,10 +52,10 @@ namespace {
         node::Environment* env = setup->env();
 
         node_run_result_t result { 0, nullptr };
-        // node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
-        //     result.exit_code = exit_code;
-        //     node::Stop(env);
-        // });
+        node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
+            result.exit_code = exit_code;
+            node::Stop(env);
+        });
 
         {
             v8::Locker locker(isolate);

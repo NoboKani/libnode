@@ -15,20 +15,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [macos-11, windows-2019, ubuntu-20.04]
-        os: [windows-2019]
-        # x86: [0, 1]
-        # small_icu: [0, 1]
+        os: [macos-11, windows-2019, ubuntu-20.04]
+        x86: [0, 1]
+        small_icu: [0, 1]
         python-version: ["3.10"]
         exclude:
           - os: macos-11
-          #   x86: 1
+            x86: 1
           - os: ubuntu-20.04
-          #  x86: 1
+            x86: 1
     runs-on: ${{ matrix.os }}
-    # env:
-    #  LIBNODE_X86: ${{ matrix.x86 }}
-    #  LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
+    env:
+      LIBNODE_X86: ${{ matrix.x86 }}
+      LIBNODE_SMALL_ICU: ${{ matrix.small_icu }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -45,13 +44,13 @@ jobs:
         run: choco install -y patch
         if: runner.os == 'Windows'
 
-      # - name: Install ninja on macOS
-      #   run: HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja
-      #   if: runner.os == 'macOS'
+      - name: Install ninja on macOS
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja
+        if: runner.os == 'macOS'
 
-      # - name: Install ninja on Ubuntu
-      #   run: sudo apt-get install -y ninja-build
-      #   if: runner.os == 'Linux'
+      - name: Install ninja on Ubuntu
+        run: sudo apt-get install -y ninja-build
+        if: runner.os == 'Linux'
 
       - name: Download source code of Node.js
         run: python -m scripts.download
@@ -82,8 +81,8 @@ jobs:
           name: ${{ steps.archive.outputs.zipname }}
           path: ${{ steps.archive.outputs.zipname }}
 
-      # - name: Test
-      #  run: python -m scripts.test
+      - name: Test
+       run: python -m scripts.test
         
   gh_release:
     needs: build
