@@ -54,7 +54,7 @@ namespace {
         node_run_result_t result { 0, nullptr };
         node::SetProcessExitHandler(env, [&](node::Environment* env, int exit_code) {
             result.exit_code = exit_code;
-            node::Stop(env);
+            // node::Stop(env);
         });
 
         {
@@ -97,13 +97,17 @@ namespace {
 
 extern "C" {
     node_run_result_t node_run(node_options_t options) {
-        options.process_argv = uv_setup_args(options.process_argc, options.process_argv);
-        std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
+        std::vector<std::string> process_args = create_arg_vec(options.process_argc, options.process_argv);
+        if (process_args.empty()) {
+            return { 1, join_errors({ "process args is empty" })};
+        } 
+        // options.process_argv = uv_setup_args(options.process_argc, options.process_argv);
+        // std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
 
-        std::unique_ptr<node::InitializationResult> resultInit = node::InitializeOncePerProcess(args, {
+        std::unique_ptr<node::InitializationResult> resultInit = node::InitializeOncePerProcess(process_args, {
             node::ProcessInitializationFlags::kNoInitializeV8,
             node::ProcessInitializationFlags::kNoInitializeNodeV8Platform,
-            node::ProcessInitializationFlags::kDisableCLIOptions,
+            // node::ProcessInitializationFlags::kDisableCLIOptions,
             node::ProcessInitializationFlags::kDisableNodeOptionsEnv
         });
             

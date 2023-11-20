@@ -11,6 +11,6 @@ shutil.copyfile('../patch/node/src/node_embedding_api.cc', './src/node_embedding
 shutil.copyfile('../patch/node/src/node_embedding_api.h',  './src/node_embedding_api.h')
 
 try:
-    subprocess.check_call(['patch', '-p1', '-i', '../patch/node.patch'])
+    subprocess.check_call(['patch', '-p1', '-i', '../patch/node.patch', '--binary'])
 except subprocess.CalledProcessError:
     print("error")
