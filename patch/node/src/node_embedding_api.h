@@ -20,6 +20,7 @@ typedef struct {
 } node_run_result_t;
 
 node_run_result_t node_run(node_options_t);
+node_run_result_t node_run_thread(node_options_t);
 
 #ifdef __cplusplus
 }
