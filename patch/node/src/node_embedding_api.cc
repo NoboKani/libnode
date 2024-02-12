@@ -93,6 +93,8 @@ namespace {
             
         return result;
     }
+
+    std::unique_ptr<node::InitializationResult> resultInit;
 }
 
 extern "C" {
@@ -104,12 +106,46 @@ extern "C" {
         // options.process_argv = uv_setup_args(options.process_argc, options.process_argv);
         // std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
 
-        std::unique_ptr<node::InitializationResult> resultInit = node::InitializeOncePerProcess(process_args, {
+        resultInit = node::InitializeOncePerProcess(process_args, {
             node::ProcessInitializationFlags::kNoInitializeV8,
             node::ProcessInitializationFlags::kNoInitializeNodeV8Platform,
             // node::ProcessInitializationFlags::kDisableCLIOptions,
             node::ProcessInitializationFlags::kDisableNodeOptionsEnv
         });
+            
+        if (resultInit->early_return() != 0) {
+            return { resultInit->exit_code(), join_errors(resultInit->errors()) };
+        }
+
+        std::unique_ptr<node::MultiIsolatePlatform> platform = node::MultiIsolatePlatform::Create(4);
+        v8::V8::InitializePlatform(platform.get());
+        v8::V8::Initialize();
+
+        node_run_result_t result = RunNodeInstance(platform.get(), resultInit->args(), resultInit->exec_args(), options.napi_reg_func);
+
+        v8::V8::Dispose();
+        v8::V8::DisposePlatform();
+        
+        node::TearDownOncePerProcess();
+
+        return result;
+    }
+
+    
+    node_run_result_t node_run_thread(node_options_t options) {
+        std::vector<std::string> process_args = create_arg_vec(options.process_argc, options.process_argv);
+        if (process_args.empty()) {
+            return { 1, join_errors({ "process args is empty" })};
+        } 
+        // options.process_argv = uv_setup_args(options.process_argc, options.process_argv);
+        // std::vector<std::string> args(options.process_argv, options.process_argv + options.process_argc);
+
+        // resultInit = node::InitializeOncePerProcess(process_args, {
+        //     node::ProcessInitializationFlags::kNoInitializeV8,
+        //     node::ProcessInitializationFlags::kNoInitializeNodeV8Platform,
+        //     // node::ProcessInitializationFlags::kDisableCLIOptions,
+        //     node::ProcessInitializationFlags::kDisableNodeOptionsEnv
+        // });
             
         if (resultInit->early_return() != 0) {
             return { resultInit->exit_code(), join_errors(resultInit->errors()) };
